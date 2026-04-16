@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tính KM Sinh Nhật 38 Năm - Ver 3.1</title>
+    <title>Tính KM Sinh Nhật 38 Năm - Ver 3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-pnj { background-color: #003366; }
@@ -16,10 +16,10 @@
 
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden mb-6">
         <div class="bg-pnj text-white text-center py-5 relative">
-            <h1 class="text-xl font-bold uppercase tracking-wide">App Tính Khuyến Mãi</h1>
+            <h1 class="text-xl font-bold uppercase tracking-wide">Máy Tính Khuyến Mãi</h1>
             <p class="text-sm opacity-90 mt-1">Chuỗi Sinh Nhật 38 Năm</p>
             <div id="statusBadge" class="absolute top-2 right-2 bg-yellow-400 text-pnj text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                Đang tải scheme...
+                Đang tải luật...
             </div>
         </div>
 
@@ -34,6 +34,7 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">2. KHÁCH HÀNG & NHÓM HÀNG ƯU ĐÃI</label>
                 <select id="promoType" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none">
+                    <option value="NONE">Không mua SP ưu đãi giảm thêm</option>
                     <option value="ECZ_ALL">TẤT CẢ KHÁCH - Mua Trang sức ECZ/CZ</option>
                     <option value="KC_NEW">Khách MỚI/KẾT NỐI - Mua Trang sức Kim cương</option>
                     <option value="KC_VIP12">Khách VIP 1,2 - Mua Trang sức Kim cương</option>
@@ -65,10 +66,12 @@
                     <span class="text-gray-600 font-medium">Giảm thêm (% Sản phẩm):</span>
                     <span id="resGiamThem" class="font-bold text-red-600 text-lg">0đ</span>
                 </div>
+                
                 <div class="flex justify-between items-center bg-yellow-100 p-2 rounded-lg border border-yellow-200">
-                    <span class="text-yellow-800 font-bold italic">Tặng PQT mua TS/ĐH bất kỳ:</span>
+                    <span class="text-yellow-800 font-bold italic">QUÀ TẶNG VOUCHER:</span>
                     <span id="resPQT" class="font-bold text-yellow-900 text-lg underline">0đ</span>
                 </div>
+
                 <div class="h-px bg-gray-300 my-3"></div>
                 <div class="flex justify-between items-center text-xl">
                     <span class="font-bold text-gray-800">KHÁCH THANH TOÁN:</span>
@@ -88,37 +91,51 @@
                 const data = await response.text();
                 const rows = data.split('\n').map(row => row.trim()).filter(row => row.length > 0);
                 const headers = rows[0].split(',').map(h => h.trim());
+                
+                rules = [];
                 for(let i = 1; i < rows.length; i++) {
                     let cols = rows[i].split(',');
                     let ruleObj = {};
-                    headers.forEach((header, index) => { ruleObj[header] = parseFloat(cols[index]) || 0; });
+                    headers.forEach((header, index) => {
+                        ruleObj[header] = parseFloat(cols[index]) || 0;
+                    });
                     rules.push(ruleObj);
                 }
+
                 const btn = document.getElementById('calcBtn');
                 btn.disabled = false;
                 btn.className = "w-full btn-gold font-bold text-lg py-4 rounded-xl shadow-md hover:opacity-90 active:scale-95 transition transform mt-2";
                 btn.innerText = "TÍNH TOÁN NGAY";
+
                 const badge = document.getElementById('statusBadge');
-                badge.innerText = "Đã cập nhật scheme mới";
-                badge.className = "absolute top-2 right-2 bg-green-400 text-white text-[10px] font-bold px-2 py-1 rounded-full";
+                badge.innerText = "Đã cập nhật luật mới";
+                badge.className = "absolute top-2 right-2 bg-green-400 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-none";
+
             } catch (error) {
                 document.getElementById('statusBadge').innerText = "Lỗi kết nối!";
             }
         }
+
         loadConfig();
 
         function formatCurrency(input) {
             let value = input.value.replace(/\D/g, '');
-            if(value !== '') { input.value = parseInt(value).toLocaleString('en-US'); }
+            if(value !== '') {
+                input.value = parseInt(value).toLocaleString('en-US');
+            }
         }
 
-        function formatVND(number) { return number.toLocaleString('en-US') + ' đ'; }
+        function formatVND(number) {
+            return number.toLocaleString('en-US') + ' đ';
+        }
 
         function calculatePromo() {
             let rawTotal = document.getElementById('totalBill').value.replace(/\D/g, '');
             let totalBill = parseInt(rawTotal) || 0;
+            
             let rawProduct = document.getElementById('productValue').value.replace(/\D/g, '');
             let productValue = parseInt(rawProduct) || 0;
+            
             let promoType = document.getElementById('promoType').value;
 
             if (totalBill < 10000000) {
@@ -127,43 +144,47 @@
             }
 
             let activeRule = rules.find(r => totalBill >= r.Moc_Tu && totalBill <= r.Moc_Den);
-            if (!activeRule) { activeRule = rules[rules.length - 1]; }
+            if (!activeRule) {
+                activeRule = rules[rules.length - 1]; 
+            }
 
             let giamNgay = activeRule.Giam_Ngay;
             let giamThem = 0;
             
-            // Logic Giảm Thêm
+            // Lấy giá trị PQT trực tiếp từ cột trên Google Sheets
+            // Nếu Sheets chưa kịp cập nhật hoặc gõ sai tên, mặc định là 0
+            let pqtValue = activeRule.Gia_Tri_PQT || 0;
+
             if (productValue >= 10000000) {
                 if (promoType === 'ECZ_ALL') {
                     giamThem = productValue * 0.04;
                     if (giamThem > 3000000) giamThem = 3000000;
-                } else if (promoType === 'KC_NEW') {
+                } 
+                else if (promoType === 'KC_NEW') {
                     giamThem = productValue * 0.02;
                     if (giamThem > 8000000) giamThem = 8000000;
-                } else if (promoType === 'KC_VIP12') {
+                }
+                else if (promoType === 'KC_VIP12') {
                     giamThem = productValue * 0.03;
                     if (giamThem > 10000000) giamThem = 10000000;
-                } else if (promoType === 'KC_VIP3') {
-                    if (productValue >= 500000000) { giamThem = 31500000; } 
-                    else {
+                }
+                else if (promoType === 'KC_VIP3') {
+                    if (productValue >= 500000000) {
+                        giamThem = 31500000; 
+                    } else {
                         giamThem = productValue * 0.04;
                         if (giamThem > 15000000) giamThem = 15000000;
                     }
                 }
             }
 
-            // Logic PQT mới bổ sung
-            let pqtValue = 0;
-            if (totalBill >= 45000000 && totalBill < 80000000) {
-                pqtValue = 1500000;
-            } else if (totalBill >= 80000000) {
-                pqtValue = 2500000;
-            }
+            let tongSauGiam = totalBill - giamNgay - giamThem;
 
             document.getElementById('resGiamNgay').innerText = formatVND(giamNgay);
             document.getElementById('resGiamThem').innerText = formatVND(giamThem);
             document.getElementById('resPQT').innerText = formatVND(pqtValue);
-            document.getElementById('resTongSauGiam').innerText = formatVND(totalBill - giamNgay - giamThem);
+            document.getElementById('resTongSauGiam').innerText = formatVND(tongSauGiam);
+            
             document.getElementById('resultBox').classList.remove('hidden');
         }
     </script>
