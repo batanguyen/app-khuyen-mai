@@ -16,10 +16,10 @@
 
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden mb-6">
         <div class="bg-pnj text-white text-center py-5 relative">
-            <h1 class="text-xl font-bold uppercase tracking-wide">Máy Tính Khuyến Mãi</h1>
+            <h1 class="text-xl font-bold uppercase tracking-wide">Ứng Dụng Tính Khuyến Mãi</h1>
             <p class="text-sm opacity-90 mt-1">Chuỗi Sinh Nhật 38 Năm</p>
             <div id="statusBadge" class="absolute top-2 right-2 bg-yellow-400 text-pnj text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                Đang tải luật...
+                Đang tải scheme...
             </div>
         </div>
 
@@ -34,7 +34,7 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">2. KHÁCH HÀNG & NHÓM HÀNG ƯU ĐÃI</label>
                 <select id="promoType" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-800 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none">
-                    <option value="NONE">Không mua SP ưu đãi giảm thêm</option>
+                    <option value="NONE">Lựa chọn điều kiện hoá đơn</option>
                     <option value="ECZ_ALL">TẤT CẢ KHÁCH - Mua Trang sức ECZ/CZ</option>
                     <option value="KC_NEW">Khách MỚI/KẾT NỐI - Mua Trang sức Kim cương</option>
                     <option value="KC_VIP12">Khách VIP 1,2 - Mua Trang sức Kim cương</option>
@@ -108,7 +108,7 @@
                 btn.innerText = "TÍNH TOÁN NGAY";
 
                 const badge = document.getElementById('statusBadge');
-                badge.innerText = "Đã cập nhật luật mới";
+                badge.innerText = "Đã cập nhật scheme thành công";
                 badge.className = "absolute top-2 right-2 bg-green-400 text-white text-[10px] font-bold px-2 py-1 rounded-full";
 
             } catch (error) {
