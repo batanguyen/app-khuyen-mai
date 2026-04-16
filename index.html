@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHECK SCHEME PROMOTION - Ver 3.7 (PNJ MTY)</title>
+    <title>App Tính KM PNJ MTY - Ver 3.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-pnj { background-color: #003366; }
@@ -16,14 +16,14 @@
     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden mb-6">
         <div class="bg-pnj text-white text-center py-5 relative">
             <h1 class="text-xl font-bold uppercase tracking-wide">Ứng Dụng Tính Khuyến Mãi</h1>
-            <p class="text-sm opacity-90 mt-1">Cấu hình linh hoạt từ Sheets</p>
+            <p id="promoName" class="text-sm opacity-90 mt-1 italic">Đang đồng bộ tên chương trình...</p>
             <div id="statusBadge" class="absolute top-2 right-2 bg-yellow-400 text-pnj text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">Đang tải...</div>
         </div>
 
         <div class="p-6 space-y-5">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">1. TỔNG GIÁ TRỊ HÓA ĐƠN (VNĐ)</label>
-                <input type="text" id="totalBill" placeholder="VD: 50,000,000" class="w-full px-4 py-3 text-2xl font-bold text-pnj border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none transition text-center" onkeyup="formatCurrency(this)">
+                <input type="text" id="totalBill" placeholder="Nhập tổng bill..." class="w-full px-4 py-3 text-2xl font-bold text-pnj border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none transition text-center" onkeyup="formatCurrency(this)">
             </div>
 
             <div>
@@ -35,7 +35,7 @@
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">3. GIÁ TRỊ MÓN HÀNG ƯU ĐÃI (VNĐ)</label>
-                <input type="text" id="productValue" placeholder="VD: 30,000,000" class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-xl focus:border-blue-500 outline-none transition text-center" onkeyup="formatCurrency(this)">
+                <input type="text" id="productValue" placeholder="Nhập giá trị món..." class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-xl focus:border-blue-500 outline-none transition text-center" onkeyup="formatCurrency(this)">
             </div>
 
             <button id="calcBtn" onclick="calculatePromo()" disabled class="w-full bg-gray-300 text-gray-500 font-bold text-lg py-4 rounded-xl shadow-md transition transform mt-2">ĐANG ĐỒNG BỘ...</button>
@@ -55,9 +55,7 @@
     </div>
 
     <script>
-        // -----------------------------------------------------
-        // LINK CSV
-        // -----------------------------------------------------
+        // --- LINK CSV  ---
         const rulesUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1008843646&single=true&output=csv'; 
         const optionsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1142757684&single=true&output=csv'; 
 
@@ -69,6 +67,13 @@
                 const resRules = await fetch(rulesUrl);
                 const textRules = await resRules.text();
                 rules = parseCSV(textRules);
+
+                // FIX: Lấy tên chương trình từ cột Ten_Chuong_Trinh ở dòng đầu tiên
+                if (rules.length > 0 && rules[0].Ten_Chuong_Trinh) {
+                    document.getElementById('promoName').innerText = rules[0].Ten_Chuong_Trinh;
+                } else {
+                    document.getElementById('promoName').innerText = "Cấu hình linh hoạt từ Sheets";
+                }
 
                 const resOpts = await fetch(optionsUrl);
                 const textOpts = await resOpts.text();
@@ -87,21 +92,15 @@
             }
         }
 
-        // HÀM PARSER MỚI - Đã fix triệt để dấu nháy kép và ký tự ẩn
         function parseCSV(text) {
-            // Bước 1: Xóa ngay ký tự ẩn \r để tránh lỗi đuôi chuỗi
             const textCleaned = text.replace(/\r/g, '');
             const rows = textCleaned.split('\n').filter(r => r.trim().length > 0);
-            
             const splitRow = (str) => {
                 return str.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => {
-                    // Bước 2: Cắt khoảng trắng -> Bỏ dấu " ở đầu/cuối -> Cắt khoảng trắng lần nữa
                     return item.trim().replace(/^"|"$/g, '').trim();
                 });
             };
-
             const headers = splitRow(rows[0]);
-            
             return rows.slice(1).map(row => {
                 let cols = splitRow(row);
                 let obj = {};
@@ -115,7 +114,7 @@
 
         function renderOptions() {
             const select = document.getElementById('promoType');
-            select.innerHTML = '<option value="NONE">Lựa chọn Scheme</option>';
+            select.innerHTML = '<option value="NONE">LỰA CHỌN SCHEME</option>';
             categories.forEach(cat => {
                 if(cat.ID && cat.Ten_Hien_Thi) {
                     let opt = document.createElement('option');
@@ -138,7 +137,7 @@
             let prod = parseInt(document.getElementById('productValue').value.replace(/\D/g, '')) || 0;
             let type = document.getElementById('promoType').value;
 
-            if (bill < 10000000) { alert('Hóa đơn chưa đạt mốc 10 triệu ạ!'); return; }
+            if (bill < 10000000) { alert('Hóa đơn chưa đạt mốc 10 triệu!'); return; }
 
             let rule = rules.find(r => bill >= r.Moc_Tu && bill <= r.Moc_Den);
             if (!rule) rule = rules[rules.length - 1]; 
@@ -150,7 +149,6 @@
             if (prod >= 10000000 && type !== 'NONE') {
                 let tyLe = rule[`TyLe_${type}`] || 0;
                 let max = rule[`Max_${type}`] || 0;
-                
                 if (type === 'KC_VIP3' && prod >= 500000000 && rule.Fix_KC_VIP3_500M) {
                     giamThem = rule.Fix_KC_VIP3_500M;
                 } else {
@@ -160,7 +158,6 @@
 
             document.getElementById('resGiamNgay').innerText = giamNgay.toLocaleString('en-US') + ' đ';
             document.getElementById('resGiamThem').innerText = giamThem.toLocaleString('en-US') + ' đ';
-            
             const rowPQT = document.getElementById('rowPQT');
             if (pqt > 0) {
                 document.getElementById('resPQT').innerText = pqt.toLocaleString('en-US') + ' đ';
@@ -168,7 +165,6 @@
             } else {
                 rowPQT.classList.add('hidden');
             }
-
             document.getElementById('resTongSauGiam').innerText = (bill - giamNgay - giamThem).toLocaleString('en-US') + ' đ';
             document.getElementById('resultBox').classList.remove('hidden');
         }
