@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tính KM Sinh Nhật 38 Năm</title>
+    <title>Tính KM Sinh Nhật 38 Năm - V4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-pnj { background-color: #003366; }
         .text-pnj { color: #003366; }
         .btn-gold { background-color: #FBB117; color: #003366; }
-        input:focus { transform: scale(1.02); transition: all 0.2s ease-in-out; }
+        input:focus { transform: scale(1.01); transition: all 0.2s ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start pt-6 px-4">
@@ -19,7 +19,7 @@
             <h1 class="text-xl font-bold uppercase tracking-wide">Tool Tính Khuyến Mãi</h1>
             <p class="text-sm opacity-90 mt-1">Chuỗi Sinh Nhật 38 Năm</p>
             <div id="statusBadge" class="absolute top-2 right-2 bg-yellow-400 text-pnj text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                Đang tải luật...
+                Đang tải scheme...
             </div>
         </div>
 
@@ -29,7 +29,6 @@
                 <input type="text" id="totalBill" placeholder="VD: 50,000,000" 
                     class="w-full px-4 py-3 text-2xl font-bold text-pnj border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-0 outline-none transition text-center"
                     onkeyup="formatCurrency(this)">
-                <p class="text-xs text-gray-500 mt-1 text-center">Dùng để xét mốc được Giảm Ngay</p>
             </div>
 
             <div>
@@ -47,7 +46,6 @@
                 <input type="text" id="productValue" placeholder="VD: 30,000,000" 
                     class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-xl focus:border-blue-500 outline-none transition text-center"
                     onkeyup="formatCurrency(this)">
-                <p class="text-xs text-red-500 mt-1 text-center">*Điều kiện: Hoá đơn phải từ 10 triệu trở lên</p>
             </div>
 
             <button id="calcBtn" onclick="calculatePromo()" disabled class="w-full bg-gray-300 text-gray-500 font-bold text-lg py-4 rounded-xl shadow-md transition transform mt-2">
@@ -67,6 +65,10 @@
                     <span class="text-gray-600 font-medium">Giảm thêm (% Sản phẩm):</span>
                     <span id="resGiamThem" class="font-bold text-red-600 text-lg">0đ</span>
                 </div>
+                <div id="pqtRow" class="hidden flex justify-between items-center bg-yellow-100 p-2 rounded-lg">
+                    <span class="text-gray-700 font-bold">Tặng PQT (Jewelry/Watch):</span>
+                    <span id="resPQT" class="font-bold text-blue-700">1.500.000đ</span>
+                </div>
                 <div class="h-px bg-gray-300 my-3"></div>
                 <div class="flex justify-between items-center text-xl">
                     <span class="font-bold text-gray-800">TỔNG SAU GIẢM:</span>
@@ -84,10 +86,8 @@
             try {
                 const response = await fetch(csvUrl);
                 const data = await response.text();
-                
                 const rows = data.split('\n').map(row => row.trim()).filter(row => row.length > 0);
                 const headers = rows[0].split(',').map(h => h.trim());
-                
                 for(let i = 1; i < rows.length; i++) {
                     let cols = rows[i].split(',');
                     let ruleObj = {};
@@ -96,19 +96,15 @@
                     });
                     rules.push(ruleObj);
                 }
-                
                 const btn = document.getElementById('calcBtn');
                 btn.disabled = false;
                 btn.className = "w-full btn-gold font-bold text-lg py-4 rounded-xl shadow-md hover:opacity-90 active:scale-95 transition transform mt-2";
                 btn.innerText = "TÍNH TOÁN NGAY";
-
                 const badge = document.getElementById('statusBadge');
                 badge.innerText = "Đã cập nhật scheme mới";
                 badge.className = "absolute top-2 right-2 bg-green-400 text-white text-[10px] font-bold px-2 py-1 rounded-full";
-
             } catch (error) {
                 document.getElementById('statusBadge').innerText = "Lỗi kết nối mạng!";
-                document.getElementById('statusBadge').className = "absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full";
             }
         }
 
@@ -126,59 +122,44 @@
         }
 
         function calculatePromo() {
-            let rawTotal = document.getElementById('totalBill').value.replace(/\D/g, '');
-            let totalBill = parseInt(rawTotal) || 0;
-            
-            let rawProduct = document.getElementById('productValue').value.replace(/\D/g, '');
-            let productValue = parseInt(rawProduct) || 0;
-            
+            let totalBill = parseInt(document.getElementById('totalBill').value.replace(/\D/g, '')) || 0;
+            let productValue = parseInt(document.getElementById('productValue').value.replace(/\D/g, '')) || 0;
             let promoType = document.getElementById('promoType').value;
 
             if (totalBill < 10000000) {
-                alert('Khuyến mãi chỉ áp dụng cho tổng hóa đơn từ 10.000.000đ trở lên.');
+                alert('Khuyến mãi chỉ áp dụng từ 10.000.000đ.');
                 return;
             }
 
-            let activeRule = rules.find(r => totalBill >= r.Moc_Tu && totalBill <= r.Moc_Den);
-            if (!activeRule) {
-                activeRule = rules[rules.length - 1]; 
-            }
-
+            let activeRule = rules.find(r => totalBill >= r.Moc_Tu && totalBill <= r.Moc_Den) || rules[rules.length - 1];
             let giamNgay = activeRule.Giam_Ngay;
             let giamThem = 0;
             
-            // Xử lý nhánh Giảm Thêm theo cấu trúc mới
             if (productValue >= 10000000) {
                 if (promoType === 'ECZ_ALL') {
-                    giamThem = productValue * 0.04;
-                    if (giamThem > 3000000) giamThem = 3000000;
-                } 
-                else if (promoType === 'KC_NEW') {
-                    giamThem = productValue * 0.02;
-                    if (giamThem > 8000000) giamThem = 8000000;
-                }
-                else if (promoType === 'KC_VIP12') {
-                    giamThem = productValue * 0.03;
-                    if (giamThem > 10000000) giamThem = 10000000;
-                }
-                else if (promoType === 'KC_VIP3') {
-                    if (productValue >= 500000000) {
-                        giamThem = 31500000; 
-                    } else {
-                        giamThem = productValue * 0.04;
-                        if (giamThem > 15000000) giamThem = 15000000;
-                    }
+                    giamThem = Math.min(productValue * 0.04, 3000000);
+                } else if (promoType === 'KC_NEW') {
+                    giamThem = Math.min(productValue * 0.02, 8000000);
+                } else if (promoType === 'KC_VIP12') {
+                    giamThem = Math.min(productValue * 0.03, 10000000);
+                } else if (promoType === 'KC_VIP3') {
+                    if (productValue >= 500000000) giamThem = 31500000;
+                    else giamThem = Math.min(productValue * 0.04, 15000000);
                 }
             }
 
-            let tongSauGiam = totalBill - giamNgay - giamThem;
+            // Logic quà tặng PQT mới
+            if (totalBill >= 45000000) {
+                document.getElementById('pqtRow').classList.remove('hidden');
+            } else {
+                document.getElementById('pqtRow').classList.add('hidden');
+            }
 
+            let tongSauGiam = totalBill - giamNgay - giamThem;
             document.getElementById('resGiamNgay').innerText = formatVND(giamNgay);
             document.getElementById('resGiamThem').innerText = formatVND(giamThem);
             document.getElementById('resTongSauGiam').innerText = formatVND(tongSauGiam);
-            
             document.getElementById('resultBox').classList.remove('hidden');
-            document.getElementById('resultBox').classList.add('animate-fade-in-up');
         }
     </script>
 </body>
