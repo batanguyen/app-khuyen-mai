@@ -57,8 +57,9 @@
     </div>
 
     <script>
+        // LINK CSV CỦA TAB "Cau hinh CTKM"
         const rulesUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1008843646&single=true&output=csv';
-        // ANH DÁN LINK CSV CỦA TAB "DANH MỤC OPTION" VÀO ĐÂY NHÉ
+        // LINK CSV CỦA TAB "Danh_Muc_Option"
         const optionsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1142757684&single=true&output=csv'; 
 
         let rules = [];
@@ -101,7 +102,7 @@
 
         function renderOptions() {
             const select = document.getElementById('promoType');
-            select.innerHTML = '<option value="NONE">Không mua SP ưu đãi giảm thêm</option>';
+            select.innerHTML = '<option value="NONE">Lựa chọn Scheme</option>';
             categories.forEach(cat => {
                 let opt = document.createElement('option');
                 opt.value = cat.ID;
