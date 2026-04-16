@@ -136,7 +136,7 @@
             return number.toLocaleString('en-US') + ' đ';
         }
 
-        // HÀM TÍNH TOÁN CHÍNH (RULE ENGINE)
+// HÀM TÍNH TOÁN CHÍNH (RULE ENGINE)
         function calculatePromo() {
             // 1. Lấy dữ liệu đầu vào
             let rawTotal = document.getElementById('totalBill').value.replace(/\D/g, '');
@@ -161,23 +161,32 @@
                 activeRule = rules[rules.length - 1]; 
             }
 
-            // 3. Tính GIẢM NGAY
+            // 3. Tính GIẢM NGAY (Không thay đổi logic)
             let giamNgay = activeRule.Giam_Ngay;
 
             // 4. Tính GIẢM THÊM theo Sản phẩm & Loại Khách
             let giamThem = 0;
             
             if (promoType === 'ECZ_NEW') {
-                giamThem = productValue * activeRule.TyLe_ECZ_New;
-                if (giamThem > activeRule.Max_ECZ_New) giamThem = activeRule.Max_ECZ_New; // Chặn trần
+                // Bug 1 Fix: Chỉ topup 4% khi GIÁ TRỊ MÓN >= 10 triệu
+                if (productValue >= 10000000) {
+                    giamThem = productValue * activeRule.TyLe_ECZ_New;
+                    if (giamThem > activeRule.Max_ECZ_New) giamThem = activeRule.Max_ECZ_New; // Chặn trần
+                }
             } 
             else if (promoType === 'KC_VIP12') {
                 giamThem = productValue * activeRule.TyLe_KC_VIP12;
                 if (giamThem > activeRule.Max_KC_VIP12) giamThem = activeRule.Max_KC_VIP12; // Chặn trần
             }
             else if (promoType === 'KC_VIP3') {
-                giamThem = productValue * activeRule.TyLe_KC_VIP3;
-                if (giamThem > activeRule.Max_KC_VIP3) giamThem = activeRule.Max_KC_VIP3; // Chặn trần
+                // Bug 2 Fix: Ưu tiên mức giảm 31.5M cho món >= 500 triệu
+                if (productValue >= 500000000) {
+                    giamThem = 31500000;
+                } else {
+                    // Nếu dưới 500tr thì tính 2% và chặn trần 8 triệu như bình thường
+                    giamThem = productValue * activeRule.TyLe_KC_VIP3;
+                    if (giamThem > activeRule.Max_KC_VIP3) giamThem = activeRule.Max_KC_VIP3; 
+                }
             }
 
             // 5. Tính Tổng và Hiển thị
