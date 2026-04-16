@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Máy Tính KM PNJ - Ver 3.6 (Fix Parser)</title>
+    <title>Máy Tính KM PNJ - Ver 3.7 (Clean Text)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-pnj { background-color: #003366; }
@@ -87,13 +87,17 @@
             }
         }
 
-        // HÀM PARSER MỚI: Tách cột thông minh, bỏ qua dấu phẩy trong ngoặc kép
+        // HÀM PARSER MỚI - Đã fix triệt để dấu nháy kép và ký tự ẩn
         function parseCSV(text) {
-            const rows = text.split('\n').filter(r => r.trim().length > 0);
+            // Bước 1: Xóa ngay ký tự ẩn \r để tránh lỗi đuôi chuỗi
+            const textCleaned = text.replace(/\r/g, '');
+            const rows = textCleaned.split('\n').filter(r => r.trim().length > 0);
             
             const splitRow = (str) => {
-                // Regex tìm dấu phẩy không nằm trong ngoặc kép
-                return str.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => item.replace(/^"|"$/g, '').trim());
+                return str.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => {
+                    // Bước 2: Cắt khoảng trắng -> Bỏ dấu " ở đầu/cuối -> Cắt khoảng trắng lần nữa
+                    return item.trim().replace(/^"|"$/g, '').trim();
+                });
             };
 
             const headers = splitRow(rows[0]);
@@ -103,7 +107,6 @@
                 let obj = {};
                 headers.forEach((h, i) => {
                     let val = cols[i];
-                    // Nếu là số thì ép kiểu, nếu là text thì giữ nguyên
                     obj[h] = (val !== undefined && val !== "" && !isNaN(val)) ? parseFloat(val) : val;
                 });
                 return obj;
@@ -114,7 +117,6 @@
             const select = document.getElementById('promoType');
             select.innerHTML = '<option value="NONE">Không mua SP ưu đãi giảm thêm</option>';
             categories.forEach(cat => {
-                // Đảm bảo không render các dòng trống
                 if(cat.ID && cat.Ten_Hien_Thi) {
                     let opt = document.createElement('option');
                     opt.value = cat.ID;
@@ -139,7 +141,7 @@
             if (bill < 10000000) { alert('Hóa đơn chưa đạt mốc 10 triệu ạ!'); return; }
 
             let rule = rules.find(r => bill >= r.Moc_Tu && bill <= r.Moc_Den);
-            if (!rule) rule = rules[rules.length - 1]; // Lấy mốc cao nhất nếu vượt khung
+            if (!rule) rule = rules[rules.length - 1]; 
 
             let giamNgay = rule.Giam_Ngay || 0;
             let pqt = rule.Gia_Tri_PQT || 0;
