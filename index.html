@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Máy Tính KM PNJ - Ver 3.5</title>
+    <title>Máy Tính KM PNJ - Ver 3.6 (Fix Parser)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .bg-pnj { background-color: #003366; }
         .text-pnj { color: #003366; }
         .btn-gold { background-color: #FBB117; color: #003366; }
-        .loading-shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center pt-4 px-4">
@@ -48,7 +46,7 @@
                 <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Giảm ngay:</span><span id="resGiamNgay" class="font-bold text-red-600 text-lg">0đ</span></div>
                 <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Giảm thêm (% Sản phẩm):</span><span id="resGiamThem" class="font-bold text-red-600 text-lg">0đ</span></div>
                 <div id="rowPQT" class="hidden flex justify-between items-center bg-yellow-100 p-2 rounded-lg border border-yellow-200">
-                    <span class="text-yellow-800 font-bold italic">TẶNG PQT MUA TS/ĐH BẤT KỲ:</span><span id="resPQT" class="font-bold text-yellow-900 text-lg underline">0đ</span>
+                    <span class="text-yellow-800 font-bold italic">QUÀ TẶNG VOUCHER:</span><span id="resPQT" class="font-bold text-yellow-900 text-lg underline">0đ</span>
                 </div>
                 <div class="h-px bg-gray-300 my-3"></div>
                 <div class="flex justify-between items-center text-xl"><span class="font-bold text-gray-800">KHÁCH THANH TOÁN:</span><span id="resTongSauGiam" class="font-extrabold text-pnj text-2xl">0đ</span></div>
@@ -57,22 +55,21 @@
     </div>
 
     <script>
-        // LINK CSV CỦA TAB "Cau hinh CTKM"
-        const rulesUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1008843646&single=true&output=csv';
-        // LINK CSV CỦA TAB "Danh_Muc_Option"
-        const optionsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFpA8jFp8OI8Ggo_mNa2Unjicbb7pP0OFa0pUXGgjtaARuhj3CPiMcKFH8MbGrCRcmj5T26j2o1-jb/pub?gid=1142757684&single=true&output=csv'; 
+        // -----------------------------------------------------
+        // ANH DÁN LẠI 2 LINK CSV CỦA ANH VÀO ĐÂY NHÉ
+        // -----------------------------------------------------
+        const rulesUrl = 'LINK_CSV_TAB_QUY_TAC_CUA_ANH'; 
+        const optionsUrl = 'LINK_CSV_TAB_OPTION_CUA_ANH'; 
 
         let rules = [];
         let categories = [];
 
         async function fetchData() {
             try {
-                // Tải scheme mốc bill
                 const resRules = await fetch(rulesUrl);
                 const textRules = await resRules.text();
                 rules = parseCSV(textRules);
 
-                // Tải danh mục Option
                 const resOpts = await fetch(optionsUrl);
                 const textOpts = await resOpts.text();
                 categories = parseCSV(textOpts);
@@ -81,33 +78,49 @@
                 
                 document.getElementById('calcBtn').disabled = false;
                 document.getElementById('calcBtn').innerText = "TÍNH TOÁN NGAY";
-                document.getElementById('calcBtn').className = "w-full btn-gold font-bold text-lg py-4 rounded-xl shadow-md";
+                document.getElementById('calcBtn').className = "w-full btn-gold font-bold text-lg py-4 rounded-xl shadow-md active:scale-95 transition transform";
                 document.getElementById('statusBadge').innerText = "Sẵn sàng";
                 document.getElementById('statusBadge').className = "absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-none";
             } catch (e) {
+                console.error(e);
                 document.getElementById('statusBadge').innerText = "Lỗi tải dữ liệu!";
             }
         }
 
+        // HÀM PARSER MỚI: Tách cột thông minh, bỏ qua dấu phẩy trong ngoặc kép
         function parseCSV(text) {
-            const rows = text.split('\n').map(r => r.trim()).filter(r => r.length > 0);
-            const headers = rows[0].split(',').map(h => h.trim());
+            const rows = text.split('\n').filter(r => r.trim().length > 0);
+            
+            const splitRow = (str) => {
+                // Regex tìm dấu phẩy không nằm trong ngoặc kép
+                return str.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(item => item.replace(/^"|"$/g, '').trim());
+            };
+
+            const headers = splitRow(rows[0]);
+            
             return rows.slice(1).map(row => {
-                let cols = row.split(',');
+                let cols = splitRow(row);
                 let obj = {};
-                headers.forEach((h, i) => obj[h] = isNaN(cols[i]) ? cols[i] : parseFloat(cols[i]));
+                headers.forEach((h, i) => {
+                    let val = cols[i];
+                    // Nếu là số thì ép kiểu, nếu là text thì giữ nguyên
+                    obj[h] = (val !== undefined && val !== "" && !isNaN(val)) ? parseFloat(val) : val;
+                });
                 return obj;
             });
         }
 
         function renderOptions() {
             const select = document.getElementById('promoType');
-            select.innerHTML = '<option value="NONE">Lựa chọn Scheme</option>';
+            select.innerHTML = '<option value="NONE">Không mua SP ưu đãi giảm thêm</option>';
             categories.forEach(cat => {
-                let opt = document.createElement('option');
-                opt.value = cat.ID;
-                opt.innerText = cat.Ten_Hien_Thi;
-                select.appendChild(opt);
+                // Đảm bảo không render các dòng trống
+                if(cat.ID && cat.Ten_Hien_Thi) {
+                    let opt = document.createElement('option');
+                    opt.value = cat.ID;
+                    opt.innerText = cat.Ten_Hien_Thi;
+                    select.appendChild(opt);
+                }
             });
         }
 
@@ -125,17 +138,17 @@
 
             if (bill < 10000000) { alert('Hóa đơn chưa đạt mốc 10 triệu ạ!'); return; }
 
-            let rule = rules.find(r => bill >= r.Moc_Tu && bill <= r.Moc_Den) || rules[rules.length - 1];
+            let rule = rules.find(r => bill >= r.Moc_Tu && bill <= r.Moc_Den);
+            if (!rule) rule = rules[rules.length - 1]; // Lấy mốc cao nhất nếu vượt khung
+
             let giamNgay = rule.Giam_Ngay || 0;
             let pqt = rule.Gia_Tri_PQT || 0;
             let giamThem = 0;
 
             if (prod >= 10000000 && type !== 'NONE') {
-                // Tự động tìm TyLe_ và Max_ dựa trên ID
                 let tyLe = rule[`TyLe_${type}`] || 0;
                 let max = rule[`Max_${type}`] || 0;
                 
-                // Logic Fix riêng cho VIP3 >= 500tr vẫn được giữ lại
                 if (type === 'KC_VIP3' && prod >= 500000000 && rule.Fix_KC_VIP3_500M) {
                     giamThem = rule.Fix_KC_VIP3_500M;
                 } else {
@@ -143,18 +156,18 @@
                 }
             }
 
-            document.getElementById('resGiamNgay').innerText = giamNgay.toLocaleString() + ' đ';
-            document.getElementById('resGiamThem').innerText = giamThem.toLocaleString() + ' đ';
+            document.getElementById('resGiamNgay').innerText = giamNgay.toLocaleString('en-US') + ' đ';
+            document.getElementById('resGiamThem').innerText = giamThem.toLocaleString('en-US') + ' đ';
             
             const rowPQT = document.getElementById('rowPQT');
             if (pqt > 0) {
-                document.getElementById('resPQT').innerText = pqt.toLocaleString() + ' đ';
+                document.getElementById('resPQT').innerText = pqt.toLocaleString('en-US') + ' đ';
                 rowPQT.classList.remove('hidden');
             } else {
                 rowPQT.classList.add('hidden');
             }
 
-            document.getElementById('resTongSauGiam').innerText = (bill - giamNgay - giamThem).toLocaleString() + ' đ';
+            document.getElementById('resTongSauGiam').innerText = (bill - giamNgay - giamThem).toLocaleString('en-US') + ' đ';
             document.getElementById('resultBox').classList.remove('hidden');
         }
     </script>
