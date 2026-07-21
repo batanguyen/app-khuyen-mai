@@ -304,7 +304,7 @@
         return parseFloat(cleanVal) || 0; 
     }
 
-    function calcTool1() {
+function calcTool1() {
         let bk = getVal('t1_bangke');
         let bac = getVal('t1_bac');
         let cz = getVal('t1_cz');
@@ -313,11 +313,13 @@
 
         let tongHD = bac + cz + kc + y;
 
+        // 1. Tính Ưu đãi Chung
         let ud_bac = (bac >= 800000 && bac < 2500000) ? bac*0.1 : (bac >= 2500000 ? bac*0.12 : 0);
         let ud_cz = cz < 15000000 ? cz*0.06 : (cz < 30000000 ? cz*0.08 : cz*0.1);
         let ud_kc = kc < 15000000 ? kc*0.06 : (kc < 30000000 ? kc*0.08 : kc*0.1);
         let ud_y = y >= 5000000 ? y*0.08 : 0;
         
+        // 2. Tính Ưu đãi Thêm
         let ud_them_kc = kc * 0.04;
 
         if(cz === 0) ud_cz = 0;
@@ -328,24 +330,32 @@
         let final_tileBK = 0;
 
         if (bk !== 1 && bk > 0) {
-            let temp_cd_cz = cz * 0.03;
-            let temp_cd_kc = kc * 0.03;
-            let temp_cd_y = y * 0.03;
+            // TÍNH GIÁ TRỊ CÒN LẠI (Giá trị HĐ - Ưu đãi Chung - Ưu đãi Thêm)
+            let remain_cz = cz - ud_cz;
+            let remain_kc = kc - ud_kc - ud_them_kc;
+            let remain_y = y - ud_y;
+
+            // Nhẩm thử Tỉ lệ với chiết khấu chuyển đổi 3% trên GIÁ TRỊ CÒN LẠI
+            let temp_cd_cz = remain_cz * 0.03;
+            let temp_cd_kc = remain_kc * 0.03;
+            let temp_cd_y = remain_y * 0.03;
             
             let temp_tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + temp_cd_cz + temp_cd_kc + temp_cd_y;
             let temp_khachTra = tongHD - temp_tongCK;
             let temp_tile = temp_khachTra / bk;
             
+            // Nếu Tỉ lệ >= 50% thì lấy GIÁ TRỊ CÒN LẠI nhân 5%
             if (temp_tile >= 0.5) {
-                ud_cd_cz = cz * 0.05;
-                ud_cd_kc = kc * 0.05;
-                ud_cd_y = y * 0.05;
+                ud_cd_cz = remain_cz * 0.05;
+                ud_cd_kc = remain_kc * 0.05;
+                ud_cd_y = remain_y * 0.05;
             } else {
                 ud_cd_cz = temp_cd_cz;
                 ud_cd_kc = temp_cd_kc;
                 ud_cd_y = temp_cd_y;
             }
             
+            // Chốt Tỉ lệ hiển thị cuối cùng
             let final_tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
             let final_khachTra = tongHD - final_tongCK;
             final_tileBK = final_khachTra / bk;
@@ -354,9 +364,11 @@
         let tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
         let khachTra = tongHD - tongCK;
 
+        // Quà tặng
         let qua = "KHÔNG TẶNG QUÀ";
         if (kc >= 30000000 || y >= 50000000) qua = "TẶNG 01 KIM BẢO NGŨ HÀNH - 0.1 CHỈ";
 
+        // Trả kết quả ra UI
         document.getElementById('t1_tongck').innerText = formatVND(tongCK);
         document.getElementById('t1_thuctra').innerText = formatVND(khachTra);
         document.getElementById('t1_tile').innerText = (final_tileBK * 100).toFixed(1) + '%';
