@@ -1,10 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tool Hỗ Trợ TVV</title>
+    
+    <!-- Gọi trực tiếp font Plus Jakarta Sans từ Google Fonts, không cần tải file về -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #0056b3;
@@ -14,53 +19,145 @@
             --pink: #e83e8c;
             --orange: #fd7e14;
         }
+        
         body {
-            font-family: Arial, sans-serif;
+            /* Sử dụng Plus Jakarta Sans làm font mặc định */
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
-            margin: 0; padding: 10px;
+            margin: 0; 
+            padding: clamp(10px, 3vw, 20px);
+            font-size: 16px; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        
         .container {
-            max-width: 480px; margin: 0 auto;
-            background: #fff; border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;
+            max-width: 480px; 
+            margin: 0 auto;
+            background: #fff; 
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            overflow: hidden;
         }
+        
         .header {
-            background: var(--primary); color: white;
-            text-align: center; padding: 15px; font-weight: bold;
+            background: var(--primary); 
+            color: white;
+            text-align: center; 
+            padding: clamp(12px, 3vw, 15px); 
+            font-weight: 800;
+            font-size: clamp(1.1rem, 4vw, 1.25rem);
+            letter-spacing: 0.5px;
         }
+        
         .tabs {
-            display: flex; background: #e9ecef;
+            display: flex; 
+            background: #e9ecef;
         }
+        
         .tab-btn {
-            flex: 1; padding: 10px 5px; border: none; font-size: 12px;
-            background: none; font-weight: bold; cursor: pointer;
+            flex: 1; 
+            padding: clamp(10px, 2.5vw, 12px) 5px; 
+            border: none; 
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            font-family: inherit;
+            background: none; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
+        
         .tab-btn.active {
-            background: #fff; color: var(--primary);
+            background: #fff; 
+            color: var(--primary);
             border-bottom: 3px solid var(--primary);
         }
-        .tool-content { display: none; padding: 15px; }
+        
+        .tool-content { display: none; padding: clamp(12px, 4vw, 20px); }
         .tool-content.active { display: block; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        
+        .form-group { margin-bottom: clamp(12px, 3vw, 16px); }
+        
+        label { 
+            display: block; 
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem); 
+            font-weight: 700; 
+            margin-bottom: 6px; 
+            color: #333; 
+        }
+        
         input {
-            width: 100%; padding: 10px; border: 1px solid #ccc;
-            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+            width: 100%; 
+            padding: clamp(10px, 3vw, 14px); 
+            border: 1px solid #ccc;
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            font-family: inherit;
+            font-weight: 600;
         }
+        
         .btn-calc {
-            width: 100%; padding: 12px; background: var(--primary);
-            color: white; border: none; border-radius: 4px;
-            font-size: 16px; font-weight: bold; margin-top: 10px;
+            width: 100%; 
+            padding: clamp(12px, 3.5vw, 16px); 
+            background: var(--primary);
+            color: white; 
+            border: none; 
+            border-radius: 6px;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem); 
+            font-weight: 800; 
+            font-family: inherit;
+            margin-top: 10px;
+            cursor: pointer;
         }
-        .result-box { margin-top: 20px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;}
-        .res-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;}
-        .bg-green { background-color: var(--green); color: white; }
-        .bg-yellow { background-color: var(--yellow); color: black; font-weight: bold; font-size: 18px;}
-        .bg-pink { background-color: var(--pink); color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;}
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background: #eee; }
-        .item-card { border: 1px dashed #ccc; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        
+        .result-box { 
+            margin-top: clamp(16px, 4vw, 24px); 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            overflow: hidden;
+        }
+        
+        .res-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: clamp(10px, 3vw, 14px); 
+            border-bottom: 1px solid #eee;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+        
+        .bg-green { background-color: var(--green); color: white; font-weight: 600;}
+        .bg-yellow { 
+            background-color: var(--yellow); 
+            color: black; 
+            font-weight: 800; 
+            font-size: clamp(1.1rem, 4vw, 1.25rem);
+        }
+        .bg-pink { background-color: var(--pink); color: white; font-weight: 700; }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: clamp(10px, 3vw, 15px); 
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        }
+        
+        th, td { 
+            border: 1px solid #ccc; 
+            padding: clamp(8px, 2vw, 12px); 
+            text-align: center; 
+        }
+        th { background: #eee; font-weight: 800; }
+        td { font-weight: 600; }
+        
+        .item-card { 
+            border: 1px dashed #ccc; 
+            padding: clamp(10px, 3vw, 15px); 
+            margin-bottom: clamp(10px, 3vw, 15px); 
+            border-radius: 6px; 
+            background: #fafafa;
+        }
     </style>
 </head>
 <body>
@@ -107,7 +204,7 @@
                 <span>KHÁCH THỰC TRẢ:</span><span id="t1_thuctra">0</span>
             </div>
             <div class="res-row" style="background:#fff3cd;">
-                <span>Tỉ lệ chuyển đổi:</span><span id="t1_tile">0%</span>
+                <span style="font-weight: 600;">Tỉ lệ chuyển đổi:</span><span id="t1_tile" style="font-weight: 700;">0%</span>
             </div>
             <div class="res-row bg-pink">
                 <span style="width:100%; text-align:center;" id="t1_quatang">KHÔNG TẶNG QUÀ</span>
@@ -120,9 +217,9 @@
         <div id="itemList">
             <div class="item-card">
                 <b>MÓN 1</b>
-                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:5px;">
-                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:5px;">
-                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:5px;">
+                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;">
+                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;">
+                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;">
             </div>
         </div>
         <button class="btn-calc" style="background:#17a2b8;" onclick="addItem()">+ THÊM MÓN</button>
@@ -168,7 +265,6 @@
 </div>
 
 <script>
-    // Hàm chuyển Tab
     function openTab(evt, toolName) {
         let i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tool-content");
@@ -179,11 +275,9 @@
         evt.currentTarget.className += " active";
     }
 
-    // Format tiền VNĐ
     function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n) + ' đ'; }
     function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
-    // Logic Tool 1
     function calcTool1() {
         let bk = getVal('t1_bangke');
         let bac = getVal('t1_bac');
@@ -194,21 +288,17 @@
         let tongHD = bac + cz + kc + y;
         let tileBK = bk === 1 ? 0 : (bk / tongHD);
 
-        // Ưu đãi Chung
         let ud_bac = (bac >= 800000 && bac < 2500000) ? bac*0.1 : (bac >= 2500000 ? bac*0.12 : 0);
         let ud_cz = cz < 15000000 ? cz*0.06 : (cz < 30000000 ? cz*0.08 : cz*0.1);
         let ud_kc = kc < 15000000 ? kc*0.06 : (kc < 30000000 ? kc*0.08 : kc*0.1);
         let ud_y = y >= 5000000 ? y*0.08 : 0;
         
-        // Ưu đãi Thêm
         let ud_them_kc = kc * 0.04;
 
-        // Ưu đãi Chuyển đổi
         let ud_cd_cz = tileBK < 0.5 ? cz*0.03 : cz*0.05;
         let ud_cd_kc = tileBK < 0.5 ? kc*0.03 : kc*0.05;
         let ud_cd_y = tileBK < 0.5 ? y*0.03 : y*0.05;
 
-        // Xử lý case khách không nhập giá trị cho nhóm đó (Tránh nhân % với 0 ra số sai logic nếu không mua)
         if(cz === 0) {ud_cz = 0; ud_cd_cz = 0;}
         if(kc === 0) {ud_kc = 0; ud_them_kc = 0; ud_cd_kc = 0;}
         if(y === 0) {ud_y = 0; ud_cd_y = 0;}
@@ -216,7 +306,6 @@
         let tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
         let khachTra = tongHD - tongCK;
 
-        // Quà tặng
         let qua = "KHÔNG TẶNG QUÀ";
         if (kc >= 30000000 || y >= 50000000) qua = "TẶNG 01 KIM BẢO NGŨ HÀNH - 0.1 CHỈ";
 
@@ -227,16 +316,15 @@
         document.getElementById('res_tool1').style.display = 'block';
     }
 
-    // Logic Tool 2
     let itemCount = 1;
     function addItem() {
         itemCount++;
         let html = `
             <div class="item-card">
                 <b>MÓN ${itemCount}</b>
-                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:5px;">
-                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:5px;">
-                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:5px;">
+                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;">
+                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;">
+                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;">
             </div>`;
         document.getElementById('itemList').insertAdjacentHTML('beforeend', html);
     }
@@ -244,7 +332,7 @@
     function calcTool2() {
         let cards = document.getElementsByClassName('item-card');
         let totalItems = cards.length;
-        let pck = totalItems === 1 ? 0.1 : (totalItems === 2 ? 0.2 : 0.3); // Giới hạn 3 món max 30% theo bài toán
+        let pck = totalItems === 1 ? 0.1 : (totalItems === 2 ? 0.2 : 0.3); 
         if (totalItems >= 3) pck = 0.3;
 
         let tongCK = 0;
@@ -265,7 +353,6 @@
         document.getElementById('res_tool2').style.display = 'block';
     }
 
-    // Logic Tool 3
     function calcTool3() {
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
