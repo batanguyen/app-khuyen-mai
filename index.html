@@ -84,7 +84,7 @@
             color: #333; 
         }
         
-        input {
+        input, select {
             width: 100%; 
             padding: clamp(10px, 3vw, 14px); 
             border: 1px solid #ccc;
@@ -93,6 +93,15 @@
             font-size: clamp(0.875rem, 3vw, 1rem);
             font-family: inherit;
             font-weight: 600;
+        }
+
+        /* Class làm nổi bật ô Bảng kê */
+        .highlight-input {
+            background-color: #fff3cd !important;
+            border: 2px solid var(--orange) !important;
+            color: #d32f2f !important;
+            font-weight: 800 !important;
+            box-shadow: 0 0 8px rgba(253, 126, 20, 0.2);
         }
         
         .btn-calc {
@@ -174,7 +183,8 @@
     <div id="tool1" class="tool-content active">
         <div class="form-group">
             <label>Giá trị Bảng kê (Nhập 1 nếu không có):</label>
-            <input type="text" inputmode="numeric" id="t1_bangke" value="1" oninput="formatCurrency(this)">
+            <!-- Đã thêm class highlight-input vào đây -->
+            <input type="text" inputmode="numeric" id="t1_bangke" class="highlight-input" value="1" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
             <label>Giá trị Bạc (Từ 800K):</label>
@@ -212,15 +222,19 @@
 
     <!-- TOOL 2: TS TÍNH CÔNG -->
     <div id="tool2" class="tool-content">
-        <div id="itemList">
-            <div class="item-card">
-                <b>MÓN 1</b>
-                <input type="text" inputmode="numeric" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;" oninput="formatCurrency(this)">
-                <input type="text" inputmode="numeric" class="t2_trongluong" placeholder="Trọng lượng Vàng (Chỉ nhập số nguyên)" style="margin-top:8px;" oninput="formatCurrency(this)">
-                <input type="text" inputmode="numeric" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
-            </div>
+        <div class="form-group">
+            <label>Số lượng món:</label>
+            <select id="t2_loaibill">
+                <option value="1">Bill 1 món (Giảm 10% tiền công)</option>
+                <option value="2">Bill 2 món (Giảm 20% tiền công)</option>
+                <option value="3">Bill 3 món trở lên (Giảm 30% tiền công)</option>
+            </select>
         </div>
-        <button class="btn-calc" style="background:#17a2b8;" onclick="addItem()">+ THÊM MÓN</button>
+        <div class="item-card">
+            <input type="text" inputmode="numeric" id="t2_tiencong" placeholder="Tổng giá trị Tiền công của Bill" style="margin-top:8px;" oninput="formatCurrency(this)">
+            <input type="text" inputmode="numeric" id="t2_trongluong" placeholder="Tổng trọng lượng Vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
+            <input type="text" inputmode="numeric" id="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
+        </div>
         <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
 
         <div class="result-box" id="res_tool2" style="display:none;">
@@ -273,9 +287,8 @@
         evt.currentTarget.className += " active";
     }
 
-    // Hàm tự động chèn dấu chấm phân cách hàng ngàn khi gõ
     function formatCurrency(input) {
-        let value = input.value.replace(/\D/g, ''); // Chỉ lấy ký tự số
+        let value = input.value.replace(/\D/g, '');
         if (value !== '') {
             input.value = new Intl.NumberFormat('vi-VN').format(value);
         } else {
@@ -285,18 +298,10 @@
 
     function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n) + ' đ'; }
     
-    // Hàm lấy giá trị thật để tính toán (Bỏ đi các dấu chấm phân cách)
     function getVal(id) { 
         let rawVal = document.getElementById(id).value;
-        let cleanVal = rawVal.replace(/\./g, ''); // Xóa dấu chấm
-        return parseFloat(cleanVal) || 0; 
-    }
-
-    // Hàm lấy giá trị thật từ input class cho Tool 2
-    function getClassVal(inputElement) {
-        let rawVal = inputElement.value;
         let cleanVal = rawVal.replace(/\./g, ''); 
-        return parseFloat(cleanVal) || 0;
+        return parseFloat(cleanVal) || 0; 
     }
 
     function calcTool1() {
@@ -307,7 +312,6 @@
         let y = getVal('t1_y');
 
         let tongHD = bac + cz + kc + y;
-        let tileBK = bk === 1 ? 0 : (bk / tongHD);
 
         let ud_bac = (bac >= 800000 && bac < 2500000) ? bac*0.1 : (bac >= 2500000 ? bac*0.12 : 0);
         let ud_cz = cz < 15000000 ? cz*0.06 : (cz < 30000000 ? cz*0.08 : cz*0.1);
@@ -316,13 +320,36 @@
         
         let ud_them_kc = kc * 0.04;
 
-        let ud_cd_cz = tileBK < 0.5 ? cz*0.03 : cz*0.05;
-        let ud_cd_kc = tileBK < 0.5 ? kc*0.03 : kc*0.05;
-        let ud_cd_y = tileBK < 0.5 ? y*0.03 : y*0.05;
+        if(cz === 0) ud_cz = 0;
+        if(kc === 0) {ud_kc = 0; ud_them_kc = 0;}
+        if(y === 0) ud_y = 0;
 
-        if(cz === 0) {ud_cz = 0; ud_cd_cz = 0;}
-        if(kc === 0) {ud_kc = 0; ud_them_kc = 0; ud_cd_kc = 0;}
-        if(y === 0) {ud_y = 0; ud_cd_y = 0;}
+        let ud_cd_cz = 0, ud_cd_kc = 0, ud_cd_y = 0;
+        let final_tileBK = 0;
+
+        if (bk !== 1 && bk > 0) {
+            let temp_cd_cz = cz * 0.03;
+            let temp_cd_kc = kc * 0.03;
+            let temp_cd_y = y * 0.03;
+            
+            let temp_tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + temp_cd_cz + temp_cd_kc + temp_cd_y;
+            let temp_khachTra = tongHD - temp_tongCK;
+            let temp_tile = temp_khachTra / bk;
+            
+            if (temp_tile >= 0.5) {
+                ud_cd_cz = cz * 0.05;
+                ud_cd_kc = kc * 0.05;
+                ud_cd_y = y * 0.05;
+            } else {
+                ud_cd_cz = temp_cd_cz;
+                ud_cd_kc = temp_cd_kc;
+                ud_cd_y = temp_cd_y;
+            }
+            
+            let final_tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
+            let final_khachTra = tongHD - final_tongCK;
+            final_tileBK = final_khachTra / bk;
+        }
 
         let tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
         let khachTra = tongHD - tongCK;
@@ -332,47 +359,23 @@
 
         document.getElementById('t1_tongck').innerText = formatVND(tongCK);
         document.getElementById('t1_thuctra').innerText = formatVND(khachTra);
-        document.getElementById('t1_tile').innerText = (tileBK * 100).toFixed(1) + '%';
+        document.getElementById('t1_tile').innerText = (final_tileBK * 100).toFixed(1) + '%';
         document.getElementById('t1_quatang').innerText = qua;
         document.getElementById('res_tool1').style.display = 'block';
     }
 
-    let itemCount = 1;
-    function addItem() {
-        itemCount++;
-        let html = `
-            <div class="item-card">
-                <b>MÓN ${itemCount}</b>
-                <input type="text" inputmode="numeric" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;" oninput="formatCurrency(this)">
-                <input type="text" inputmode="numeric" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
-                <input type="text" inputmode="numeric" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
-            </div>`;
-        document.getElementById('itemList').insertAdjacentHTML('beforeend', html);
-    }
-
     function calcTool2() {
-        let cards = document.getElementsByClassName('item-card');
+        let loaiBill = parseInt(document.getElementById('t2_loaibill').value);
+        let tc = getVal('t2_tiencong');
+        let tl = getVal('t2_trongluong');
+        let gv = getVal('t2_giavang');
         
-        let tongCK = 0;
-        let khachTra = 0;
-
-        for(let i=0; i<cards.length; i++) {
-            let tc = getClassVal(cards[i].getElementsByClassName('t2_tiencong')[0]);
-            let tl = getClassVal(cards[i].getElementsByClassName('t2_trongluong')[0]);
-            let gv = getClassVal(cards[i].getElementsByClassName('t2_giavang')[0]);
-            
-            // Logic mới: Xét % chiết khấu dựa trên thứ tự món (i bắt đầu từ 0)
-            let pck = 0.1; // Mặc định Món 1 giảm 10%
-            if (i === 1) {
-                pck = 0.2; // Món 2 giảm 20%
-            } else if (i >= 2) {
-                pck = 0.3; // Món 3 trở lên giảm 30%
-            }
-            
-            let ck_mon = tc * pck;
-            tongCK += ck_mon;
-            khachTra += ((tc - ck_mon) + (tl * gv));
-        }
+        let pck = 0.1;
+        if (loaiBill === 2) pck = 0.2;
+        if (loaiBill === 3) pck = 0.3;
+        
+        let tongCK = tc * pck;
+        let khachTra = (tc - tongCK) + (tl * gv);
 
         document.getElementById('t2_tongck').innerText = formatVND(tongCK);
         document.getElementById('t2_thuctra').innerText = formatVND(khachTra);
@@ -383,7 +386,6 @@
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
         
-        // Cập nhật mảng 5 kỳ theo yêu cầu mới
         let percents = [0.10, 0.20, 0.25, 0.25, 0.20];
         let days = [0, 30, 60, 90, 120];
         let labels = ['T/T+1', 'T + 30', 'T + 60', 'T + 90', 'T + 120'];
