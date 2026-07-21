@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tool Hỗ Trợ TVV</title>
     
-    <!-- Gọi trực tiếp font Plus Jakarta Sans từ Google Fonts, không cần tải file về -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -21,7 +20,6 @@
         }
         
         body {
-            /* Sử dụng Plus Jakarta Sans làm font mặc định */
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
             margin: 0; 
@@ -176,23 +174,23 @@
     <div id="tool1" class="tool-content active">
         <div class="form-group">
             <label>Giá trị Bảng kê (Nhập 1 nếu không có):</label>
-            <input type="number" id="t1_bangke" value="1">
+            <input type="text" inputmode="numeric" id="t1_bangke" value="1" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
             <label>Giá trị Bạc (Từ 800K):</label>
-            <input type="number" id="t1_bac" placeholder="0">
+            <input type="text" inputmode="numeric" id="t1_bac" placeholder="0" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
             <label>Giá trị Đá màu/CZ:</label>
-            <input type="number" id="t1_cz" placeholder="0">
+            <input type="text" inputmode="numeric" id="t1_cz" placeholder="0" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
             <label>Giá trị Kim cương + Vỏ:</label>
-            <input type="number" id="t1_kc" placeholder="0">
+            <input type="text" inputmode="numeric" id="t1_kc" placeholder="0" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
             <label>Giá trị TS Ý/Không đá:</label>
-            <input type="number" id="t1_y" placeholder="0">
+            <input type="text" inputmode="numeric" id="t1_y" placeholder="0" oninput="formatCurrency(this)">
         </div>
         <button class="btn-calc" onclick="calcTool1()">TÍNH TOÁN KẾT QUẢ</button>
 
@@ -217,9 +215,9 @@
         <div id="itemList">
             <div class="item-card">
                 <b>MÓN 1</b>
-                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;">
-                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;">
-                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;">
+                <input type="text" inputmode="numeric" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;" oninput="formatCurrency(this)">
+                <input type="text" inputmode="numeric" class="t2_trongluong" placeholder="Trọng lượng Vàng (Chỉ nhập số nguyên)" style="margin-top:8px;" oninput="formatCurrency(this)">
+                <input type="text" inputmode="numeric" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
             </div>
         </div>
         <button class="btn-calc" style="background:#17a2b8;" onclick="addItem()">+ THÊM MÓN</button>
@@ -243,7 +241,7 @@
         </div>
         <div class="form-group">
             <label>Tổng giá trị cần thanh toán (VNĐ):</label>
-            <input type="number" id="t3_tongtien" placeholder="Ví dụ: 100000000">
+            <input type="text" inputmode="numeric" id="t3_tongtien" placeholder="Ví dụ: 100.000.000" oninput="formatCurrency(this)">
         </div>
         <button class="btn-calc" onclick="calcTool3()">TẠO LỊCH THANH TOÁN</button>
         
@@ -275,8 +273,31 @@
         evt.currentTarget.className += " active";
     }
 
+    // Hàm tự động chèn dấu chấm phân cách hàng ngàn khi gõ
+    function formatCurrency(input) {
+        let value = input.value.replace(/\D/g, ''); // Chỉ lấy ký tự số
+        if (value !== '') {
+            input.value = new Intl.NumberFormat('vi-VN').format(value);
+        } else {
+            input.value = '';
+        }
+    }
+
     function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n) + ' đ'; }
-    function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+    
+    // Hàm lấy giá trị thật để tính toán (Bỏ đi các dấu chấm phân cách)
+    function getVal(id) { 
+        let rawVal = document.getElementById(id).value;
+        let cleanVal = rawVal.replace(/\./g, ''); // Xóa dấu chấm
+        return parseFloat(cleanVal) || 0; 
+    }
+
+    // Hàm lấy giá trị thật từ input class cho Tool 2
+    function getClassVal(inputElement) {
+        let rawVal = inputElement.value;
+        let cleanVal = rawVal.replace(/\./g, ''); 
+        return parseFloat(cleanVal) || 0;
+    }
 
     function calcTool1() {
         let bk = getVal('t1_bangke');
@@ -322,9 +343,9 @@
         let html = `
             <div class="item-card">
                 <b>MÓN ${itemCount}</b>
-                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;">
-                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;">
-                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;">
+                <input type="text" inputmode="numeric" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:8px;" oninput="formatCurrency(this)">
+                <input type="text" inputmode="numeric" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
+                <input type="text" inputmode="numeric" class="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
             </div>`;
         document.getElementById('itemList').insertAdjacentHTML('beforeend', html);
     }
@@ -339,9 +360,9 @@
         let khachTra = 0;
 
         for(let i=0; i<cards.length; i++) {
-            let tc = parseFloat(cards[i].getElementsByClassName('t2_tiencong')[0].value) || 0;
-            let tl = parseFloat(cards[i].getElementsByClassName('t2_trongluong')[0].value) || 0;
-            let gv = parseFloat(cards[i].getElementsByClassName('t2_giavang')[0].value) || 0;
+            let tc = getClassVal(cards[i].getElementsByClassName('t2_tiencong')[0]);
+            let tl = getClassVal(cards[i].getElementsByClassName('t2_trongluong')[0]);
+            let gv = getClassVal(cards[i].getElementsByClassName('t2_giavang')[0]);
             
             let ck_mon = tc * pck;
             tongCK += ck_mon;
@@ -357,18 +378,20 @@
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
         
-        let percents = [0.05, 0.30, 0.30, 0.35];
-        let days = [0, 20, 40, 60];
+        // Cập nhật mảng 5 kỳ theo yêu cầu mới
+        let percents = [0.10, 0.20, 0.25, 0.25, 0.20];
+        let days = [0, 30, 60, 90, 120];
+        let labels = ['T/T+1', 'T + 30', 'T + 60', 'T + 90', 'T + 120'];
         let html = '';
 
-        for(let i=0; i<4; i++) {
+        for(let i=0; i<5; i++) {
             let d = new Date(today);
             d.setDate(today.getDate() + days[i]);
             let dateStr = d.toLocaleDateString('vi-VN');
             let tienKy = tongTien * percents[i];
             
             html += `<tr>
-                <td>T${days[i] === 0 ? '' : ' + ' + days[i]}</td>
+                <td>${labels[i]}</td>
                 <td>${dateStr}</td>
                 <td>${percents[i]*100}%</td>
                 <td>${formatVND(tienKy)}</td>
