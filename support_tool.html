@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tool Hỗ Trợ TVV</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg: #f4f6f9;
+            --green: #28a745;
+            --yellow: #ffc107;
+            --pink: #e83e8c;
+            --orange: #fd7e14;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 10px;
+        }
+        .container {
+            max-width: 480px; margin: 0 auto;
+            background: #fff; border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .header {
+            background: var(--primary); color: white;
+            text-align: center; padding: 15px; font-weight: bold;
+        }
+        .tabs {
+            display: flex; background: #e9ecef;
+        }
+        .tab-btn {
+            flex: 1; padding: 10px 5px; border: none; font-size: 12px;
+            background: none; font-weight: bold; cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #fff; color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        .tool-content { display: none; padding: 15px; }
+        .tool-content.active { display: block; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        }
+        .btn-calc {
+            width: 100%; padding: 12px; background: var(--primary);
+            color: white; border: none; border-radius: 4px;
+            font-size: 16px; font-weight: bold; margin-top: 10px;
+        }
+        .result-box { margin-top: 20px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;}
+        .res-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;}
+        .bg-green { background-color: var(--green); color: white; }
+        .bg-yellow { background-color: var(--yellow); color: black; font-weight: bold; font-size: 18px;}
+        .bg-pink { background-color: var(--pink); color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;}
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background: #eee; }
+        .item-card { border: 1px dashed #ccc; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">CÔNG CỤ HỖ TRỢ TVV</div>
+    
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'tool1')">NHÓM HÀNG</button>
+        <button class="tab-btn" onclick="openTab(event, 'tool2')">TS TÍNH CÔNG</button>
+        <button class="tab-btn" onclick="openTab(event, 'tool3')">LỊCH THANH TOÁN</button>
+    </div>
+
+    <!-- TOOL 1: NHÓM HÀNG -->
+    <div id="tool1" class="tool-content active">
+        <div class="form-group">
+            <label>Giá trị Bảng kê (Nhập 1 nếu không có):</label>
+            <input type="number" id="t1_bangke" value="1">
+        </div>
+        <div class="form-group">
+            <label>Giá trị Bạc (Từ 800K):</label>
+            <input type="number" id="t1_bac" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>Giá trị Đá màu/CZ:</label>
+            <input type="number" id="t1_cz" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>Giá trị Kim cương + Vỏ:</label>
+            <input type="number" id="t1_kc" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>Giá trị TS Ý/Không đá:</label>
+            <input type="number" id="t1_y" placeholder="0">
+        </div>
+        <button class="btn-calc" onclick="calcTool1()">TÍNH TOÁN KẾT QUẢ</button>
+
+        <div class="result-box" id="res_tool1" style="display:none;">
+            <div class="res-row bg-green">
+                <span>Tổng chiết khấu:</span><span id="t1_tongck">0</span>
+            </div>
+            <div class="res-row bg-yellow">
+                <span>KHÁCH THỰC TRẢ:</span><span id="t1_thuctra">0</span>
+            </div>
+            <div class="res-row" style="background:#fff3cd;">
+                <span>Tỉ lệ chuyển đổi:</span><span id="t1_tile">0%</span>
+            </div>
+            <div class="res-row bg-pink">
+                <span style="width:100%; text-align:center;" id="t1_quatang">KHÔNG TẶNG QUÀ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOL 2: TS TÍNH CÔNG -->
+    <div id="tool2" class="tool-content">
+        <div id="itemList">
+            <div class="item-card">
+                <b>MÓN 1</b>
+                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:5px;">
+                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:5px;">
+                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:5px;">
+            </div>
+        </div>
+        <button class="btn-calc" style="background:#17a2b8;" onclick="addItem()">+ THÊM MÓN</button>
+        <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
+
+        <div class="result-box" id="res_tool2" style="display:none;">
+            <div class="res-row bg-green">
+                <span>Tổng chiết khấu:</span><span id="t2_tongck">0</span>
+            </div>
+            <div class="res-row bg-yellow">
+                <span>KHÁCH THỰC TRẢ:</span><span id="t2_thuctra">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOL 3: TRỢ LÝ TRẢ CHẬM -->
+    <div id="tool3" class="tool-content">
+        <div class="form-group">
+            <label>Tên Khách Hàng:</label>
+            <input type="text" id="t3_ten">
+        </div>
+        <div class="form-group">
+            <label>Tổng giá trị cần thanh toán (VNĐ):</label>
+            <input type="number" id="t3_tongtien" placeholder="Ví dụ: 100000000">
+        </div>
+        <button class="btn-calc" onclick="calcTool3()">TẠO LỊCH THANH TOÁN</button>
+        
+        <div id="res_tool3" style="display:none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>KỲ</th>
+                        <th>THỜI GIAN</th>
+                        <th>TỈ LỆ</th>
+                        <th>SỐ TIỀN</th>
+                    </tr>
+                </thead>
+                <tbody id="t3_table_body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hàm chuyển Tab
+    function openTab(evt, toolName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tool-content");
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+        document.getElementById(toolName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Format tiền VNĐ
+    function formatVND(n) { return new Intl.NumberFormat('vi-VN').format(n) + ' đ'; }
+    function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+    // Logic Tool 1
+    function calcTool1() {
+        let bk = getVal('t1_bangke');
+        let bac = getVal('t1_bac');
+        let cz = getVal('t1_cz');
+        let kc = getVal('t1_kc');
+        let y = getVal('t1_y');
+
+        let tongHD = bac + cz + kc + y;
+        let tileBK = bk === 1 ? 0 : (bk / tongHD);
+
+        // Ưu đãi Chung
+        let ud_bac = (bac >= 800000 && bac < 2500000) ? bac*0.1 : (bac >= 2500000 ? bac*0.12 : 0);
+        let ud_cz = cz < 15000000 ? cz*0.06 : (cz < 30000000 ? cz*0.08 : cz*0.1);
+        let ud_kc = kc < 15000000 ? kc*0.06 : (kc < 30000000 ? kc*0.08 : kc*0.1);
+        let ud_y = y >= 5000000 ? y*0.08 : 0;
+        
+        // Ưu đãi Thêm
+        let ud_them_kc = kc * 0.04;
+
+        // Ưu đãi Chuyển đổi
+        let ud_cd_cz = tileBK < 0.5 ? cz*0.03 : cz*0.05;
+        let ud_cd_kc = tileBK < 0.5 ? kc*0.03 : kc*0.05;
+        let ud_cd_y = tileBK < 0.5 ? y*0.03 : y*0.05;
+
+        // Xử lý case khách không nhập giá trị cho nhóm đó (Tránh nhân % với 0 ra số sai logic nếu không mua)
+        if(cz === 0) {ud_cz = 0; ud_cd_cz = 0;}
+        if(kc === 0) {ud_kc = 0; ud_them_kc = 0; ud_cd_kc = 0;}
+        if(y === 0) {ud_y = 0; ud_cd_y = 0;}
+
+        let tongCK = ud_bac + ud_cz + ud_kc + ud_y + ud_them_kc + ud_cd_cz + ud_cd_kc + ud_cd_y;
+        let khachTra = tongHD - tongCK;
+
+        // Quà tặng
+        let qua = "KHÔNG TẶNG QUÀ";
+        if (kc >= 30000000 || y >= 50000000) qua = "TẶNG 01 KIM BẢO NGŨ HÀNH - 0.1 CHỈ";
+
+        document.getElementById('t1_tongck').innerText = formatVND(tongCK);
+        document.getElementById('t1_thuctra').innerText = formatVND(khachTra);
+        document.getElementById('t1_tile').innerText = (tileBK * 100).toFixed(1) + '%';
+        document.getElementById('t1_quatang').innerText = qua;
+        document.getElementById('res_tool1').style.display = 'block';
+    }
+
+    // Logic Tool 2
+    let itemCount = 1;
+    function addItem() {
+        itemCount++;
+        let html = `
+            <div class="item-card">
+                <b>MÓN ${itemCount}</b>
+                <input type="number" class="t2_tiencong" placeholder="Giá trị Tiền công" style="margin-top:5px;">
+                <input type="number" class="t2_trongluong" placeholder="Trọng lượng Vàng" style="margin-top:5px;">
+                <input type="number" class="t2_giavang" placeholder="Giá vàng" style="margin-top:5px;">
+            </div>`;
+        document.getElementById('itemList').insertAdjacentHTML('beforeend', html);
+    }
+
+    function calcTool2() {
+        let cards = document.getElementsByClassName('item-card');
+        let totalItems = cards.length;
+        let pck = totalItems === 1 ? 0.1 : (totalItems === 2 ? 0.2 : 0.3); // Giới hạn 3 món max 30% theo bài toán
+        if (totalItems >= 3) pck = 0.3;
+
+        let tongCK = 0;
+        let khachTra = 0;
+
+        for(let i=0; i<cards.length; i++) {
+            let tc = parseFloat(cards[i].getElementsByClassName('t2_tiencong')[0].value) || 0;
+            let tl = parseFloat(cards[i].getElementsByClassName('t2_trongluong')[0].value) || 0;
+            let gv = parseFloat(cards[i].getElementsByClassName('t2_giavang')[0].value) || 0;
+            
+            let ck_mon = tc * pck;
+            tongCK += ck_mon;
+            khachTra += ((tc - ck_mon) + (tl * gv));
+        }
+
+        document.getElementById('t2_tongck').innerText = formatVND(tongCK);
+        document.getElementById('t2_thuctra').innerText = formatVND(khachTra);
+        document.getElementById('res_tool2').style.display = 'block';
+    }
+
+    // Logic Tool 3
+    function calcTool3() {
+        let tongTien = getVal('t3_tongtien');
+        let today = new Date();
+        
+        let percents = [0.05, 0.30, 0.30, 0.35];
+        let days = [0, 20, 40, 60];
+        let html = '';
+
+        for(let i=0; i<4; i++) {
+            let d = new Date(today);
+            d.setDate(today.getDate() + days[i]);
+            let dateStr = d.toLocaleDateString('vi-VN');
+            let tienKy = tongTien * percents[i];
+            
+            html += `<tr>
+                <td>T${days[i] === 0 ? '' : ' + ' + days[i]}</td>
+                <td>${dateStr}</td>
+                <td>${percents[i]*100}%</td>
+                <td>${formatVND(tienKy)}</td>
+            </tr>`;
+        }
+        
+        html += `<tr style="font-weight:bold; background:#fff3cd;">
+            <td colspan="2">TỔNG CỘNG</td>
+            <td>100%</td>
+            <td>${formatVND(tongTien)}</td>
+        </tr>`;
+
+        document.getElementById('t3_table_body').innerHTML = html;
+        document.getElementById('res_tool3').style.display = 'block';
+    }
+</script>
+</body>
+</html>
