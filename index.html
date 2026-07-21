@@ -352,10 +352,7 @@
 
     function calcTool2() {
         let cards = document.getElementsByClassName('item-card');
-        let totalItems = cards.length;
-        let pck = totalItems === 1 ? 0.1 : (totalItems === 2 ? 0.2 : 0.3); 
-        if (totalItems >= 3) pck = 0.3;
-
+        
         let tongCK = 0;
         let khachTra = 0;
 
@@ -363,6 +360,14 @@
             let tc = getClassVal(cards[i].getElementsByClassName('t2_tiencong')[0]);
             let tl = getClassVal(cards[i].getElementsByClassName('t2_trongluong')[0]);
             let gv = getClassVal(cards[i].getElementsByClassName('t2_giavang')[0]);
+            
+            // Logic mới: Xét % chiết khấu dựa trên thứ tự món (i bắt đầu từ 0)
+            let pck = 0.1; // Mặc định Món 1 giảm 10%
+            if (i === 1) {
+                pck = 0.2; // Món 2 giảm 20%
+            } else if (i >= 2) {
+                pck = 0.3; // Món 3 trở lên giảm 30%
+            }
             
             let ck_mon = tc * pck;
             tongCK += ck_mon;
