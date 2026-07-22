@@ -275,7 +275,7 @@
             
             <!-- Dòng ghi chú pháp lý -->
             <div style="font-size: clamp(0.7rem, 2.5vw, 0.8rem); font-style: italic; color: #666; margin-top: 12px; line-height: 1.5; text-align: justify;">
-                * "T + n" là ngày làm việc thứ n kể từ ngày liền sau Ngày T. Nếu ngày dự kiến thanh toán rơi vào ngày không phải Ngày làm việc, thời hạn được chuyển sang Ngày làm việc tiếp theo.
+                * "T + n" là ngày làm việc thứ n kể từ ngày liền sau Ngày T. Nếu ngày dự kiến thanh toán rơi vào ngày không phải Ngày làm việc, thời hạn được chuyển sang Ngày làm việc tiếp theo. Ngày làm việc sẽ bao gồm Thứ 7, Chủ Nhật.
             </div>
         </div>
     </div>
@@ -403,10 +403,9 @@ function calcTool1() {
         "01/01", // Tết Dương Lịch
         "30/04", // Giải phóng miền Nam
         "01/05", // Quốc tế Lao động
-        "02/09", // Quốc khánh (Có thể thêm 01/09 hoặc 03/09 tùy quy định nghỉ bù từng năm)
+        "02/09", // Quốc khánh (Anh có thể thêm 01/09 hoặc 03/09 tùy quy định nghỉ bù từng năm)
         
         // Lễ Âm lịch (Thay đổi mỗi năm, anh nhập full Ngày/Tháng/Năm của năm hiện tại)
-        // Dưới đây là demo lịch nghỉ Tết Nguyên Đán và Giỗ Tổ của năm 2026 để anh hình dung
         "16/02/2026", "17/02/2026", "18/02/2026", "19/02/2026", "20/02/2026", // Mùng 1 đến Mùng 5 Tết 2026
         "26/04/2026" // Giỗ tổ Hùng Vương 2026 (10/03 Âm lịch)
     ];
@@ -424,7 +423,7 @@ function calcTool1() {
         return VIETNAM_HOLIDAYS.includes(ddmm) || VIETNAM_HOLIDAYS.includes(ddmmyyyy);
     }
 
-    // Hàm phụ trợ: Cộng thêm ngày làm việc (Bỏ qua T7, CN và Ngày lễ)
+    // Hàm phụ trợ: Cộng thêm ngày (Tính cả T7, CN - Chỉ bỏ qua Ngày lễ)
     function addWorkingDays(startDate, daysToAdd) {
         let currentDate = new Date(startDate);
         let addedDays = 0;
@@ -432,10 +431,9 @@ function calcTool1() {
         while (addedDays < daysToAdd) {
             currentDate.setDate(currentDate.getDate() + 1);
             
-            let dayOfWeek = currentDate.getDay();
-            // Điều kiện: Không phải Chủ nhật (0), không phải Thứ 7 (6) VÀ không phải ngày lễ
-            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday(currentDate)) {
-                addedDays++; // Chỉ đếm khi thỏa mãn là ngày làm việc hợp lệ
+            // Điều kiện mới: Chỉ kiểm tra ngày lễ, không còn check Thứ 7 & Chủ Nhật
+            if (!isHoliday(currentDate)) {
+                addedDays++; 
             }
         }
         return currentDate;
