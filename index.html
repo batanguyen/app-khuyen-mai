@@ -394,19 +394,71 @@ function calcTool1() {
         document.getElementById('res_tool2').style.display = 'block';
     }
 
+// Danh sách ngày lễ Việt Nam
+    const VIETNAM_HOLIDAYS = [
+        // Lễ Dương lịch cố định hàng năm (Chỉ cần ghi Ngày/Tháng)
+        "01/01", // Tết Dương Lịch
+        "30/04", // Giải phóng miền Nam
+        "01/05", // Quốc tế Lao động
+        "02/09", // Quốc khánh (Có thể thêm 01/09 hoặc 03/09 tùy quy định nghỉ bù từng năm)
+        
+        // Lễ Âm lịch (Thay đổi mỗi năm, anh nhập full Ngày/Tháng/Năm của năm hiện tại)
+        // Dưới đây là demo lịch nghỉ Tết Nguyên Đán và Giỗ Tổ của năm 2026 để anh hình dung
+        "16/02/2026", "17/02/2026", "18/02/2026", "19/02/2026", "20/02/2026", // Mùng 1 đến Mùng 5 Tết 2026
+        "26/04/2026" // Giỗ tổ Hùng Vương 2026 (10/03 Âm lịch)
+    ];
+
+    // Hàm phụ trợ: Kiểm tra xem ngày hiện tại có phải là ngày lễ không
+    function isHoliday(dateObj) {
+        let d = String(dateObj.getDate()).padStart(2, '0');
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        let y = dateObj.getFullYear();
+        
+        let ddmm = d + '/' + m; // Định dạng DD/MM cho lễ cố định
+        let ddmmyyyy = d + '/' + m + '/' + y; // Định dạng DD/MM/YYYY cho lễ âm lịch
+        
+        // Trả về true nếu ngày đó có trong mảng danh sách
+        return VIETNAM_HOLIDAYS.includes(ddmm) || VIETNAM_HOLIDAYS.includes(ddmmyyyy);
+    }
+
+    // Hàm phụ trợ: Cộng thêm ngày làm việc (Bỏ qua T7, CN và Ngày lễ)
+    function addWorkingDays(startDate, daysToAdd) {
+        let currentDate = new Date(startDate);
+        let addedDays = 0;
+        
+        while (addedDays < daysToAdd) {
+            currentDate.setDate(currentDate.getDate() + 1);
+            
+            let dayOfWeek = currentDate.getDay();
+            // Điều kiện: Không phải Chủ nhật (0), không phải Thứ 7 (6) VÀ không phải ngày lễ
+            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday(currentDate)) {
+                addedDays++; // Chỉ đếm khi thỏa mãn là ngày làm việc hợp lệ
+            }
+        }
+        return currentDate;
+    }
+
     function calcTool3() {
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
         
+        // Tỉ lệ và số ngày làm việc cộng thêm
         let percents = [0.10, 0.20, 0.25, 0.25, 0.20];
-        let days = [0, 30, 60, 90, 120];
+        let workingDays = [0, 30, 60, 90, 120];
         let labels = ['T/T+1', 'T + 30', 'T + 60', 'T + 90', 'T + 120'];
         let html = '';
 
         for(let i=0; i<5; i++) {
-            let d = new Date(today);
-            d.setDate(today.getDate() + days[i]);
-            let dateStr = d.toLocaleDateString('vi-VN');
+            let targetDate;
+            
+            // Xử lý riêng kỳ đầu tiên (Nếu workingDays = 0 thì tính luôn ngày hôm nay)
+            if (workingDays[i] === 0) {
+                targetDate = new Date(today);
+            } else {
+                targetDate = addWorkingDays(today, workingDays[i]);
+            }
+            
+            let dateStr = targetDate.toLocaleDateString('vi-VN');
             let tienKy = tongTien * percents[i];
             
             html += `<tr>
