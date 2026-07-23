@@ -230,11 +230,13 @@
         </div>
         <div class="item-card">
             <input type="text" inputmode="numeric" id="t2_tiencong" placeholder="Tổng giá trị Tiền công của Bill" style="margin-top:8px;" oninput="formatCurrency(this)">
-            <!-- Đã gỡ formatCurrency, đổi inputmode thành decimal, cập nhật placeholder -->
-            <input type="text" inputmode="decimal" id="t2_trongluong" placeholder="Tổng trọng lượng Vàng (VD: 98.5680)" style="margin-top:8px;">
+            
+            <!-- Ô này tuyệt đối không được dùng formatCurrency anh nhé -->
+            <input type="text" inputmode="decimal" id="t2_trongluong" placeholder="Tổng trọng lượng Vàng (VD: 20.000)" style="margin-top:8px;">
+            
             <input type="text" inputmode="numeric" id="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
-        </div>        <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
-
+        </div>
+        <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
         <div class="result-box" id="res_tool2" style="display:none;">
             <div class="res-row bg-green">
                 <span>Tổng chiết khấu:</span><span id="t2_tongck">0</span>
@@ -380,22 +382,36 @@
 
     function calcTool2() {
         let loaiBill = parseInt(document.getElementById('t2_loaibill').value);
-        let tc = getVal('t2_tiencong');
         
-        // Lấy giá trị thập phân (float) riêng cho trọng lượng vàng
+        // (4) Lấy Tiền công
+        let tc = getVal('t2_tiencong'); 
+        
+        // (1) Lấy Trọng lượng vàng (Hỗ trợ đọc chuẩn số thập phân cả dấu chấm và phẩy)
         let rawTl = document.getElementById('t2_trongluong').value;
         let tl = parseFloat(rawTl.replace(',', '.')) || 0; 
         
-        let gv = getVal('t2_giavang');
+        // (2) Lấy Giá vàng tại thời điểm
+        let gv = getVal('t2_giavang'); 
         
+        // Xét % chiết khấu tùy theo Loại Bill
         let pck = 0.1;
         if (loaiBill === 2) pck = 0.2;
         if (loaiBill === 3) pck = 0.3;
         
-        let tongCK = tc * pck;
-        let khachTra = (tc - tongCK) + (tl * gv);
+        // (5) Tính CK Tiền công = (4) * %
+        let ck_tien_cong = Math.round(tc * pck); 
+        
+        // (6) Tính TT Sau giảm Tiền công = (4) - (5)
+        let tt_sau_giam_tc = tc - ck_tien_cong;
+        
+        // (3) Tính Thành tiền Vàng = (1) * (2)
+        let thanh_tien_vang = Math.round(tl * gv); 
+        
+        // (7) KHÁCH THỰC TRẢ = (3) + (6)
+        let khachTra = tt_sau_giam_tc + thanh_tien_vang;
 
-        document.getElementById('t2_tongck').innerText = formatVND(tongCK);
+        // In kết quả ra màn hình
+        document.getElementById('t2_tongck').innerText = formatVND(ck_tien_cong);
         document.getElementById('t2_thuctra').innerText = formatVND(khachTra);
         document.getElementById('res_tool2').style.display = 'block';
     }
