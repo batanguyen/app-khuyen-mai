@@ -230,10 +230,10 @@
         </div>
         <div class="item-card">
             <input type="text" inputmode="numeric" id="t2_tiencong" placeholder="Tổng giá trị Tiền công của Bill" style="margin-top:8px;" oninput="formatCurrency(this)">
-            <input type="text" inputmode="numeric" id="t2_trongluong" placeholder="Tổng trọng lượng Vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
+            <!-- Đã gỡ formatCurrency, đổi inputmode thành decimal, cập nhật placeholder -->
+            <input type="text" inputmode="decimal" id="t2_trongluong" placeholder="Tổng trọng lượng Vàng (VD: 98.5680)" style="margin-top:8px;">
             <input type="text" inputmode="numeric" id="t2_giavang" placeholder="Giá vàng" style="margin-top:8px;" oninput="formatCurrency(this)">
-        </div>
-        <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
+        </div>        <button class="btn-calc" onclick="calcTool2()">TÍNH TOÁN KẾT QUẢ</button>
 
         <div class="result-box" id="res_tool2" style="display:none;">
             <div class="res-row bg-green">
@@ -381,7 +381,11 @@
     function calcTool2() {
         let loaiBill = parseInt(document.getElementById('t2_loaibill').value);
         let tc = getVal('t2_tiencong');
-        let tl = getVal('t2_trongluong');
+        
+        // Lấy giá trị thập phân (float) riêng cho trọng lượng vàng
+        let rawTl = document.getElementById('t2_trongluong').value;
+        let tl = parseFloat(rawTl.replace(',', '.')) || 0; 
+        
         let gv = getVal('t2_giavang');
         
         let pck = 0.1;
