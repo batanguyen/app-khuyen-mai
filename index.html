@@ -95,7 +95,6 @@
             font-weight: 600;
         }
 
-        /* Class làm nổi bật ô Bảng kê */
         .highlight-input {
             background-color: #fff3cd !important;
             border: 2px solid var(--orange) !important;
@@ -183,7 +182,6 @@
     <div id="tool1" class="tool-content active">
         <div class="form-group">
             <label>Giá trị Bảng kê (Nhập 1 nếu không có):</label>
-            <!-- Đã thêm class highlight-input vào đây -->
             <input type="text" inputmode="numeric" id="t1_bangke" class="highlight-input" value="1" oninput="formatCurrency(this)">
         </div>
         <div class="form-group">
@@ -247,7 +245,7 @@
         </div>
     </div>
 
-<!-- TOOL 3: TRỢ LÝ TRẢ CHẬM -->
+    <!-- TOOL 3: TRỢ LÝ TRẢ CHẬM -->
     <div id="tool3" class="tool-content">
         <div class="form-group">
             <label>Tên Khách Hàng:</label>
@@ -273,12 +271,13 @@
                 </tbody>
             </table>
             
-<!-- Dòng ghi chú pháp lý cập nhật -->
+            <!-- Dòng ghi chú pháp lý cập nhật -->
             <div style="font-size: clamp(0.7rem, 2.5vw, 0.8rem); font-style: italic; color: #666; margin-top: 12px; line-height: 1.5; text-align: justify;">
                 * "T + n" là ngày thứ n kể từ ngày liền sau Ngày T, tính theo lịch dương lịch (bao gồm cả Thứ 7, Chủ Nhật và các ngày Lễ).
             </div>
         </div>
     </div>
+</div>
 <script>
     function openTab(evt, toolName) {
         let i, tabcontent, tablinks;
@@ -307,7 +306,7 @@
         return parseFloat(cleanVal) || 0; 
     }
 
-function calcTool1() {
+    function calcTool1() {
         let bk = getVal('t1_bangke');
         let bac = getVal('t1_bac');
         let cz = getVal('t1_cz');
@@ -397,49 +396,7 @@ function calcTool1() {
         document.getElementById('res_tool2').style.display = 'block';
     }
 
-// Danh sách ngày lễ Việt Nam
-    const VIETNAM_HOLIDAYS = [
-        // Lễ Dương lịch cố định hàng năm (Chỉ cần ghi Ngày/Tháng)
-        "01/01", // Tết Dương Lịch
-        "30/04", // Giải phóng miền Nam
-        "01/05", // Quốc tế Lao động
-        "02/09", // Quốc khánh (Anh có thể thêm 01/09 hoặc 03/09 tùy quy định nghỉ bù từng năm)
-        
-        // Lễ Âm lịch (Thay đổi mỗi năm, anh nhập full Ngày/Tháng/Năm của năm hiện tại)
-        "16/02/2026", "17/02/2026", "18/02/2026", "19/02/2026", "20/02/2026", // Mùng 1 đến Mùng 5 Tết 2026
-        "26/04/2026" // Giỗ tổ Hùng Vương 2026 (10/03 Âm lịch)
-    ];
-
-    // Hàm phụ trợ: Kiểm tra xem ngày hiện tại có phải là ngày lễ không
-    function isHoliday(dateObj) {
-        let d = String(dateObj.getDate()).padStart(2, '0');
-        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        let y = dateObj.getFullYear();
-        
-        let ddmm = d + '/' + m; // Định dạng DD/MM cho lễ cố định
-        let ddmmyyyy = d + '/' + m + '/' + y; // Định dạng DD/MM/YYYY cho lễ âm lịch
-        
-        // Trả về true nếu ngày đó có trong mảng danh sách
-        return VIETNAM_HOLIDAYS.includes(ddmm) || VIETNAM_HOLIDAYS.includes(ddmmyyyy);
-    }
-
-    // Hàm phụ trợ: Cộng thêm ngày (Tính cả T7, CN - Chỉ bỏ qua Ngày lễ)
-    function addWorkingDays(startDate, daysToAdd) {
-        let currentDate = new Date(startDate);
-        let addedDays = 0;
-        
-        while (addedDays < daysToAdd) {
-            currentDate.setDate(currentDate.getDate() + 1);
-            
-            // Điều kiện mới: Chỉ kiểm tra ngày lễ, không còn check Thứ 7 & Chủ Nhật
-            if (!isHoliday(currentDate)) {
-                addedDays++; 
-            }
-        }
-        return currentDate;
-    }
-
-function calcTool3() {
+    function calcTool3() {
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
         
