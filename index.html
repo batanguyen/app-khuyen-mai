@@ -439,25 +439,20 @@ function calcTool1() {
         return currentDate;
     }
 
-    function calcTool3() {
+function calcTool3() {
         let tongTien = getVal('t3_tongtien');
         let today = new Date();
         
-        // Tỉ lệ và số ngày làm việc cộng thêm
+        // Tỉ lệ và số ngày cộng thêm (Tính trọn lịch dương, không né ngày nào)
         let percents = [0.10, 0.20, 0.25, 0.25, 0.20];
-        let workingDays = [0, 30, 60, 90, 120];
+        let days = [0, 30, 60, 90, 120];
         let labels = ['T/T+1', 'T + 30', 'T + 60', 'T + 90', 'T + 120'];
         let html = '';
 
         for(let i=0; i<5; i++) {
-            let targetDate;
-            
-            // Xử lý riêng kỳ đầu tiên (Nếu workingDays = 0 thì tính luôn ngày hôm nay)
-            if (workingDays[i] === 0) {
-                targetDate = new Date(today);
-            } else {
-                targetDate = addWorkingDays(today, workingDays[i]);
-            }
+            let targetDate = new Date(today);
+            // Cộng thẳng một mạch n ngày theo đúng lịch dương
+            targetDate.setDate(today.getDate() + days[i]); 
             
             let dateStr = targetDate.toLocaleDateString('vi-VN');
             let tienKy = tongTien * percents[i];
